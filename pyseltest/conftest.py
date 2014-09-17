@@ -1,7 +1,6 @@
 import os
 import pytest
-from tests.helpers import MyTestDriver
-from app import create_app
+from pyseltest.helpers import MyTestDriver
 
 
 def pytest_addoption(parser):
@@ -9,11 +8,15 @@ def pytest_addoption(parser):
         action="store",
         default="firefox"
     )
-
+    parser.addoption("--xvfb",
+        action="store_true",
+        default=False,
+    )
 
 
 @pytest.yield_fixture(scope='session')
 def app():
+    from app import create_app
     a = create_app("config.TestingConfig")
     with a.app_context():
         a.drop_all()
@@ -60,23 +63,35 @@ def xvfb(request):
 
 
 @pytest.yield_fixture
+def pass_through(request):
+    yield
+
+
+@pytest.yield_fixture
 def browser(request):
     """
     http://chromedriver.storage.googleapis.com/index.html
     """
 
-    from selenium import webdriver
-    browser_name = request.config.getoption("--browser")
-    if browser_name == "firefox":
-        browser = webdriver.Firefox()
-    elif browser_name == "phantomjs":
-        browser = webdriver.PhantomJS()
-    elif browser_name == "chrome":
-        browser = webdriver.Chrome("./chromedriver")
+    if request.config.getoption("--xvfb"):
+        f = xvfb
     else:
-        raise Exception("Invalid browser name")
-    yield browser
-    browser.quit()
+        f = pass_through
+
+    from contextlib import contextmanager
+    with contextmanager(f)(request):
+        from selenium import webdriver
+        browser_name = request.config.getoption("--browser")
+        if browser_name == "firefox":
+            browser = webdriver.Firefox()
+        elif browser_name == "phantomjs":
+            browser = webdriver.PhantomJS()
+        elif browser_name == "chrome":
+            browser = webdriver.Chrome("./chromedriver")
+        else:
+            raise Exception("Invalid browser name")
+        yield browser
+        browser.quit()
 
 
 @pytest.yield_fixture

@@ -1,3 +1,6 @@
+from selenium.webdriver.support.ui import WebDriverWait
+
+
 class MyTestDriver:
     def __init__(self, browser, base_url):
         self.browser = browser
@@ -31,7 +34,7 @@ class MyTestDriver:
         WebDriverWait(self.browser, timeout).until(func)
 
     def wait_for_element(self, css=None, model=None, timeout=2):
-        self.wait_until(lambda br: br.get_elements(css=css, model=model) != [], timeout)
+        self.wait_until(lambda br: self.get_elements(css=css, model=model) != [], timeout)
 
 
 
