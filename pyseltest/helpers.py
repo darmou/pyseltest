@@ -1,5 +1,7 @@
-from selenium.webdriver.support.ui import WebDriverWait
+# Copyright 2014 Andrew Magee.
+# Distributed under the GPL v3 licence: http://www.gnu.org/licenses/gpl-3.0.html
 
+from selenium.webdriver.support.ui import WebDriverWait
 
 class MyTestDriver:
     def __init__(self, browser, base_url):
