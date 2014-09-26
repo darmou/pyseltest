@@ -11,8 +11,8 @@ class MyTestDriver:
     def open_page(self, path):
         return self.browser.get(self.base_url + path)
 
-    def get_element(self, css=None, model=None):
-        list = self.get_elements(css=css, model=model)
+    def get_element(self, css=None, model=None, text=None):
+        list = self.get_elements(css=css, model=model, text=text)
         if list == []:
             raise Exception("Not found")
         if len(list) > 1:
@@ -20,14 +20,20 @@ class MyTestDriver:
         return list[0]
 
     def get_elements(self, css=None, model=None, text=None):
-        if css is not None:
-            return self.browser.find_elements_by_css_selector(css)
-        elif model is not None:
-            return self.get_elements(css="[ng-model='{}']".format(model))
-        elif text is not None:
-            return [e for e in self.get_elements(css="*") if e.text == text]
-        else:
+        """
+        d.get_elements(css="a", text="hello")
+        >>> List of <a> tags whose text exactly equals "hello"
+        """
+        if not any((css, model, text)):
             raise ValueError()
+        sets = []
+        if text is not None:
+            sets.append(set([e for e in self.get_elements(css="*") if e.text == text]))
+        if css is not None:
+            sets.append(set(self.browser.find_elements_by_css_selector(css)))
+        if model is not None:
+            sets.append(set(self.get_elements(css="[ng-model='{}']".format(model))))
+        return list(set.intersection(*sets))
 
     def element_exists(self, **kwargs):
         return self.get_elements(**kwargs) != []
