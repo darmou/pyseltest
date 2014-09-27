@@ -3,6 +3,7 @@
 
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.remote.webelement import WebElement
+from ordered_set import OrderedSet
 
 class MyTestDriver:
     def __init__(self, browser, base_url):
@@ -27,14 +28,24 @@ class MyTestDriver:
         """
         if not any((css, model, text)):
             raise ValueError()
-        sets = []
+
+        # Use ordered sets so we don't muck up the ordering if the caller
+        # specifies two or more arguments.
+        items = None
+        def update(new_items):
+            nonlocal items
+            if items == None:
+                items = OrderedSet(new_items)
+            else:
+                items = items & OrderedSet(new_items)
+
         if text is not None:
-            sets.append(set([e for e in self.get_elements(css="*") if e.text == text]))
+            update([e for e in self.get_elements(css="*") if e.text == text])
         if css is not None:
-            sets.append(set(self.browser.find_elements_by_css_selector(css)))
+            update(self.browser.find_elements_by_css_selector(css))
         if model is not None:
-            sets.append(set(self.get_elements(css="[ng-model='{}']".format(model))))
-        return list(set.intersection(*sets))
+            update(self.get_elements(css="[ng-model='{}']".format(model)))
+        return items
 
     def element_exists(self, **kwargs):
         return self.get_elements(**kwargs) != []

@@ -29,5 +29,8 @@ setup(
     author_email='amagee@gmail.com',
     license='GPL v3',
     packages=['pyseltest'],
-    zip_safe=False
+    zip_safe=False,
+    install_requires=[
+        'ordered_set',
+    ]
 )
