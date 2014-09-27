@@ -2,6 +2,7 @@
 # Distributed under the GPL v3 licence: http://www.gnu.org/licenses/gpl-3.0.html
 
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.remote.webelement import WebElement
 
 class MyTestDriver:
     def __init__(self, browser, base_url):
@@ -45,6 +46,37 @@ class MyTestDriver:
         self.wait_until(lambda br: self.get_elements(css=css, model=model) != [], timeout)
 
 
+# Monkeypatch WebElement with some useful methods.
 
+@property
+def left(self):
+    return self.location['x']
+
+@property
+def top(self):
+    return self.location['y']
+
+@property
+def width(self):
+    return self.size['width']
+
+@property
+def height(self):
+    return self.size['height']
+
+@property
+def right(self):
+    return self.left + self.width
+
+@property
+def bottom(self):
+    return self.top + self.height
+
+WebElement.left = left
+WebElement.top = top
+WebElement.width = width
+WebElement.height = height
+WebElement.right = right
+WebElement.bottom = bottom
 
 
