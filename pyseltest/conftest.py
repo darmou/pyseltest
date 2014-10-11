@@ -18,42 +18,6 @@ def pytest_addoption(parser):
     )
 
 
-@pytest.yield_fixture(scope='session')
-def app():
-    from app import create_app
-    a = create_app("config.TestingConfig")
-    with a.app_context():
-        a.drop_all()
-        a.init_db()
-        a.connection = a.engine.connect()
-        a.db_session.configure(bind=a.connection)
-        yield a
-        a.connection.close()
-
-
-@pytest.yield_fixture(scope="function")
-def session(app):
-    """
-    Creates a new database session (with working transaction)
-    for a test duration.
-    """
-    app.transaction = app.connection.begin()
-
-    # pushing new Flask application context for multiple-thread
-    # tests to work
-    ctx = app.app_context()
-    ctx.push()
-
-    session = app.db_session()
-
-    yield session
-
-    # the code after yield statement works as a teardown
-    app.transaction.close()
-    session.close()
-    ctx.pop()
-
-
 @pytest.yield_fixture
 def xvfb(request):
     from xvfbwrapper import Xvfb
