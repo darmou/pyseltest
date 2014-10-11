@@ -85,8 +85,9 @@ Make the methods in ElementMethods callable from MyTestDriver objects and
 WebElement objects.
 """
 for n, f in inspect.getmembers(ElementMethods, predicate=inspect.isfunction):
-    setattr(MyTestDriver, n, f)
-    setattr(WebElement, n, f)
+    if n != "__init__":
+        setattr(MyTestDriver, n, f)
+        setattr(WebElement, n, f)
 
 
 """
